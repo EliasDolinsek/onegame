@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'core/game.dart';
+import 'details_page.dart';
 
 class OverviewPage extends StatelessWidget {
   @override
@@ -78,6 +79,7 @@ class GamesCategoryList extends StatelessWidget {
 }
 
 class GameCategoryGamesList extends StatelessWidget {
+
   final String documentId;
 
   GameCategoryGamesList(this.documentId);
@@ -90,14 +92,22 @@ class GameCategoryGamesList extends StatelessWidget {
           .document(documentId)
           .collection("games")
           .snapshots(),
-      builder: (context, snapshot) => Column(
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Column(
             children: snapshot.data.documents
                 .map((ds) => Padding(
                       padding: EdgeInsets.only(top: 8.0),
-                      child: GameCard(Game.ofDocumentSnapshot(ds)),
+                      child: GameCard(Game.ofDocumentSnapshot(ds, documentId)),
                     ))
                 .toList(),
-          ),
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      },
     );
   }
 }
@@ -109,34 +119,32 @@ class GameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20.0),
-          child: Container(
-            height: 200,
-            width: double.infinity,
-            child: game.image,
-          ),
-        ),
-        Positioned(
-          top: 155,
-          left: 16,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15.0),
+    return InkWell(
+      child: Stack(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20.0),
             child: Container(
-              color: Theme.of(context).primaryColor,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: Text(
-                  game.title,
-                  style: TextStyle(color: Colors.white, fontSize: 14.0, letterSpacing: .1, fontWeight: FontWeight.w500),
-                ),
+              height: 200,
+              width: double.infinity,
+              child: Hero(
+                child: game.image,
+                tag: "game_image${game.hashCode}",
               ),
             ),
           ),
-        )
-      ],
+          Positioned(
+            top: 140,
+            left: 16,
+            child: Chip(
+              label: Text(game.title, style: TextStyle(color: Colors.white),),
+              backgroundColor: Theme.of(context).primaryColor,
+            ),
+          )
+        ],
+      ),
+      onTap: () => Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => DetailsPage(game))),
     );
   }
 }
