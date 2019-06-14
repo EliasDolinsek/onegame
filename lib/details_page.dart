@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/game.dart';
 
 class DetailsPage extends StatefulWidget {
+
   final Game game;
 
   DetailsPage(this.game);
@@ -12,14 +13,15 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-  ScrollController _scrollController;
 
-  bool lastStatus = true;
+  ScrollController _scrollController;
+  bool _lastStatus = true, _showAnswers = false;
+  Function _onShowAnswerChange = (bool showAnswers){};
 
   _scrollListener() {
-    if (isShrink != lastStatus) {
+    if (isShrink != _lastStatus) {
       setState(() {
-        lastStatus = isShrink;
+        _lastStatus = isShrink;
       });
     }
   }
@@ -54,8 +56,9 @@ class _DetailsPageState extends State<DetailsPage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: NestedScrollView(
         controller: _scrollController,
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[sliverAppBar],
-        body: _QuestionsList(widget.game),
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) =>
+            <Widget>[sliverAppBar],
+        body: _QuestionsList(widget.game, detailsPageState: this,),
       ),
     );
   }
@@ -65,6 +68,25 @@ class _DetailsPageState extends State<DetailsPage> {
         backgroundColor: Colors.white,
         expandedHeight: 200,
         pinned: true,
+        actions: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: ActionChip(
+              label: Text(
+                _showAnswers ? "HIDE ANSWERS" : "SHOW ANSWERS",
+                style: TextStyle(
+                    color: textColor == Colors.black
+                        ? Colors.white
+                        : Colors.black),
+              ),
+              onPressed: () => setState((){
+                _showAnswers = !_showAnswers;
+                if(_onShowAnswerChange != null) _onShowAnswerChange(_showAnswers);
+              }),
+              backgroundColor: textColor,
+            ),
+          )
+        ],
         flexibleSpace: FlexibleSpaceBar(
           centerTitle: false,
           collapseMode: CollapseMode.parallax,
@@ -81,15 +103,18 @@ class _DetailsPageState extends State<DetailsPage> {
 }
 
 class _QuestionsList extends StatefulWidget {
-  final Game game;
 
-  _QuestionsList(this.game);
+  final Game game;
+  final _DetailsPageState detailsPageState;
+
+  _QuestionsList(this.game, {this.detailsPageState});
 
   @override
   _QuestionsListState createState() => _QuestionsListState();
 }
 
 class _QuestionsListState extends State<_QuestionsList> {
+
   bool _questionsLoaded, _showAnswers = false;
 
   @override
@@ -97,6 +122,13 @@ class _QuestionsListState extends State<_QuestionsList> {
     super.initState();
     _questionsLoaded = widget.game.questionsLoaded;
 
+    if (widget.detailsPageState != null){
+      widget.detailsPageState._onShowAnswerChange = (showAnswers){
+        setState(() {
+          _showAnswers = showAnswers;
+        });
+      };
+    }
     if (!_questionsLoaded) {
       widget.game.loadQuestions().whenComplete(() {
         setState(() {
@@ -121,8 +153,8 @@ class _QuestionsListState extends State<_QuestionsList> {
                     children: <Widget>[
                       Text(q.title),
                       Text(_showAnswers
-                          ? q.answerCorrect.toString().toUpperCase()
-                          : "")
+                          ? q.answerCorrect.toString()
+                          : "", style: TextStyle(color: Theme.of(context).primaryColorDark),)
                     ],
                   ),
                 ))

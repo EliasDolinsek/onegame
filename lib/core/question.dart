@@ -10,7 +10,7 @@ class Question {
   Question({this.title, this.image, this.answerCorrect});
 
   factory Question.ofDocumentSnapshot(DocumentSnapshot ds) => Question(
-        title: ds["title"],
+        title: "${ds["title"]}?",
         image: Image.network(ds["image"]),
         answerCorrect: ds["answerCorrect"],
       );
