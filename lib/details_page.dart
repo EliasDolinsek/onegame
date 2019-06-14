@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'core/game.dart';
+import 'game_page.dart';
 
 class DetailsPage extends StatefulWidget {
-
   final Game game;
 
   DetailsPage(this.game);
@@ -13,10 +13,9 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-
   ScrollController _scrollController;
   bool _lastStatus = true, _showAnswers = false;
-  Function _onShowAnswerChange = (bool showAnswers){};
+  Function _onShowAnswerChange = (bool showAnswers) {};
 
   _scrollListener() {
     if (isShrink != _lastStatus) {
@@ -52,13 +51,17 @@ class _DetailsPageState extends State<DetailsPage> {
       floatingActionButton: FloatingActionButton.extended(
           label: Text("START"),
           icon: Icon(Icons.arrow_forward),
-          onPressed: () {}),
+          onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => GamePage(widget.game)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) =>
             <Widget>[sliverAppBar],
-        body: _QuestionsList(widget.game, detailsPageState: this,),
+        body: _QuestionsList(
+          widget.game,
+          detailsPageState: this,
+        ),
       ),
     );
   }
@@ -79,10 +82,11 @@ class _DetailsPageState extends State<DetailsPage> {
                         ? Colors.white
                         : Colors.black),
               ),
-              onPressed: () => setState((){
-                _showAnswers = !_showAnswers;
-                if(_onShowAnswerChange != null) _onShowAnswerChange(_showAnswers);
-              }),
+              onPressed: () => setState(() {
+                    _showAnswers = !_showAnswers;
+                    if (_onShowAnswerChange != null)
+                      _onShowAnswerChange(_showAnswers);
+                  }),
               backgroundColor: textColor,
             ),
           )
@@ -103,7 +107,6 @@ class _DetailsPageState extends State<DetailsPage> {
 }
 
 class _QuestionsList extends StatefulWidget {
-
   final Game game;
   final _DetailsPageState detailsPageState;
 
@@ -114,7 +117,6 @@ class _QuestionsList extends StatefulWidget {
 }
 
 class _QuestionsListState extends State<_QuestionsList> {
-
   bool _questionsLoaded, _showAnswers = false;
 
   @override
@@ -122,8 +124,8 @@ class _QuestionsListState extends State<_QuestionsList> {
     super.initState();
     _questionsLoaded = widget.game.questionsLoaded;
 
-    if (widget.detailsPageState != null){
-      widget.detailsPageState._onShowAnswerChange = (showAnswers){
+    if (widget.detailsPageState != null) {
+      widget.detailsPageState._onShowAnswerChange = (showAnswers) {
         setState(() {
           _showAnswers = showAnswers;
         });
@@ -152,9 +154,11 @@ class _QuestionsListState extends State<_QuestionsList> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(q.title),
-                      Text(_showAnswers
-                          ? q.answerCorrect.toString()
-                          : "", style: TextStyle(color: Theme.of(context).primaryColorDark),)
+                      Text(
+                        _showAnswers ? q.answerCorrect.toString() : "",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorDark),
+                      )
                     ],
                   ),
                 ))
