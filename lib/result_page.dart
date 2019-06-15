@@ -56,8 +56,8 @@ class _ScoreTextsState extends State<ScoreTexts>
   void initState() {
     super.initState();
     animationController = AnimationController(
-        vsync: this, duration: Duration(seconds: widget.game.correctAnswersCount ~/ 2 + 2));
-    scoreAnimation = IntTween(begin: 0, end: widget.game.correctAnswersCount)
+        vsync: this, duration: Duration(milliseconds: 1500));
+    scoreAnimation = IntTween(begin: 0, end: widget.game.correctAnswersCount).chain(CurveTween(curve: Curves.linear))
         .animate(animationController);
 
     animationController.forward();

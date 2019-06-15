@@ -4,6 +4,8 @@ import 'core/game_manager.dart';
 import 'core/question.dart';
 import 'result_page.dart';
 
+import 'package:vibration/vibration.dart';
+
 class GamePage extends StatefulWidget {
   final Game game;
 
@@ -19,7 +21,7 @@ class _GamePageState extends State<GamePage>
   bool hideAnimationActive = false, showAnimationActive = false;
 
   final showHideAnimationDuration = Duration(milliseconds: 400);
-  final shakeAnimationDuration = Duration(milliseconds: 200);
+  final shakeAnimationDuration = Duration(milliseconds: 100);
 
   GameManager _gameManager;
   Question _currentQuestion;
@@ -73,7 +75,7 @@ class _GamePageState extends State<GamePage>
         .chain(CurveTween(
             curve: hideAnimationActive || showAnimationActive
                 ? Curves.bounceIn
-                : Curves.easeInCubic))
+                : Curves.easeInOut))
         .animate(animationController);
 
     return AnimatedBuilder(

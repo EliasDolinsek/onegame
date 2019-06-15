@@ -38,11 +38,10 @@ class QuestionsListState extends State<QuestionsList> {
   @override
   Widget build(BuildContext context) {
     if (_questionsLoaded && widget.game.questions.isNotEmpty) {
-      return ListView(
+      return ListView.builder(
         shrinkWrap: true,
-        children: widget.game.questions
-            .map((q) => getListTitleForQuestion(q))
-            .toList(),
+        itemCount: widget.game.questions.length,
+        itemBuilder: (context, index) => getListTitleForQuestion(widget.game.questions.elementAt(index)),
       );
     } else if (_questionsLoaded && widget.game.questions.isEmpty) {
       return Center(
@@ -89,7 +88,7 @@ class QuestionsListState extends State<QuestionsList> {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        SizedBox(width: 8.0,),
+        SizedBox(width: 16.0,),
         getRightText(q),
       ],
     ),
