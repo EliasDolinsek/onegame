@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'core/game.dart';
 import 'core/game_manager.dart';
 import 'core/question.dart';
+import 'result_page.dart';
 
 class GamePage extends StatefulWidget {
   final Game game;
@@ -16,7 +16,7 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage>
     with SingleTickerProviderStateMixin {
   AnimationController animationController;
-  bool hideAnimationActive = false, firstQuestion;
+  bool hideAnimationActive = false, showAnimationActive = false;
 
   final showHideAnimationDuration = Duration(milliseconds: 400);
   final shakeAnimationDuration = Duration(milliseconds: 200);
@@ -28,17 +28,16 @@ class _GamePageState extends State<GamePage>
   void initState() {
     super.initState();
     _gameManager = GameManager(widget.game, Duration(seconds: 5));
-    _loadNextQuestion();
+    _currentQuestion = _gameManager.question;
 
-    animationController =
-        AnimationController(vsync: this);
+    animationController = AnimationController(vsync: this);
     _showControlsAnimated();
-
   }
 
   @override
   void dispose() {
     super.dispose();
+    animationController.dispose();
   }
 
   @override
@@ -72,7 +71,9 @@ class _GamePageState extends State<GamePage>
   Widget _gameControlsWidget() {
     final animation = controlsWidgetTween
         .chain(CurveTween(
-            curve: hideAnimationActive || firstQuestion ? Curves.bounceIn : Curves.easeInCubic))
+            curve: hideAnimationActive || showAnimationActive
+                ? Curves.bounceIn
+                : Curves.easeInCubic))
         .animate(animationController);
 
     return AnimatedBuilder(
@@ -81,7 +82,6 @@ class _GamePageState extends State<GamePage>
         title: _currentQuestion.title,
         onTruePressed: () => _answerQuestion(true),
         onFalsePressed: () => _answerQuestion(false),
-        shakeText: !firstQuestion,
       ),
       builder: (context, child) => Transform.translate(
             offset: Offset(0, animation.value),
@@ -91,81 +91,91 @@ class _GamePageState extends State<GamePage>
   }
 
   get controlsWidgetTween {
-    if (!hideAnimationActive && firstQuestion) {
+    if (showAnimationActive) {
       return Tween(begin: 200.0, end: 0.0);
-    } else if (firstQuestion != null &&
-        !firstQuestion &&
-        !hideAnimationActive) {
-      return Tween(begin: 0.0, end: 10.0);
-    } else {
+    } else if (hideAnimationActive) {
       return Tween(begin: 0.0, end: 200.0);
+    } else {
+      return Tween(begin: 0.0, end: 10.0);
     }
   }
 
-  void _answerQuestion(bool answeredWithTrue) {
+  void _answerQuestion(bool answer) {
     _currentQuestion.answered = true;
     _currentQuestion.answeredCorrectly =
-        _currentQuestion.answerCorrect == answeredWithTrue ? true : false;
+        _currentQuestion.answerCorrect == answer ? true : false;
 
-    if (!_currentQuestion.answeredCorrectly) _endGame();
-
-    setState(() {
+    if (!_currentQuestion.answeredCorrectly) {
+      _endGame();
+    } else {
       _loadNextQuestion();
-    });
+    }
   }
 
   void _loadNextQuestion() {
     try {
       _currentQuestion = _gameManager.question;
+      _shakeControls();
     } catch (e) {
       _endGame();
-    }
-
-    if (firstQuestion == null) {
-      firstQuestion = true;
-    } else {
-      firstQuestion = false;
-      _shakeControls();
     }
   }
 
   void _endGame() async {
-    _hideControlsAnimated((status){
-      if(status == AnimationStatus.completed) Navigator.pop(context);
-    });
+    var onAnimationComplete = (status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultPage(widget.game),
+          ),
+        );
+      }
+    };
+
+    _hideControlsAnimated(onAnimationComplete);
   }
 
   void _shakeControls() {
+    setState(() {
+      showAnimationActive = false;
+      hideAnimationActive = false;
+    });
+
     animationController.duration = shakeAnimationDuration;
     animationController
-        .forward()
-        .whenComplete(() => animationController.reverse().whenComplete(() {
-      animationController.reset();
-    }));
+        .forward(from: 0)
+        .whenComplete(() => animationController.reverse());
   }
 
-  void _showControlsAnimated(){
+  void _showControlsAnimated() {
+    setState(() {
+      hideAnimationActive = false;
+      showAnimationActive = true;
+    });
+
     animationController.duration = showHideAnimationDuration;
-    animationController.forward();
+    animationController.forward(from: 0);
   }
 
-  Future<void> _hideControlsAnimated(Function animationListener(AnimationStatus status)) async {
-    hideAnimationActive = true;
+  void _hideControlsAnimated(
+      Function animationListener(AnimationStatus status)) {
+    setState(() {
+      showAnimationActive = false;
+      hideAnimationActive = true;
+    });
+
     animationController.duration = showHideAnimationDuration;
-    return animationController.addStatusListener(animationListener);
+    animationController.addStatusListener(animationListener);
+    animationController.forward(from: 0);
   }
 }
 
 class GameControls extends StatelessWidget {
-  final bool shakeText;
   final String title;
   final Function onTruePressed, onFalsePressed;
 
-  const GameControls(
-      {this.title,
-      this.onTruePressed,
-      this.onFalsePressed,
-      this.shakeText = false});
+  const GameControls({this.title, this.onTruePressed, this.onFalsePressed});
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +190,9 @@ class GameControls extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 titleWidget,
-                SizedBox(height: 8.0,),
+                SizedBox(
+                  height: 8.0,
+                ),
                 _buttonsWidget(context),
               ],
             ),
@@ -211,7 +223,13 @@ class GameControls extends StatelessWidget {
         ),
       );
 
-  Widget _trueButtonWidget(BuildContext context) => IconButton(icon: Icon(Icons.check, color: Theme.of(context).primaryColor,), onPressed: onTruePressed);
+  Widget _trueButtonWidget(BuildContext context) => IconButton(
+      icon: Icon(
+        Icons.check,
+        color: Theme.of(context).primaryColor,
+      ),
+      onPressed: onTruePressed);
 
-  Widget _falseButtonWidget() => IconButton(icon: Icon(Icons.close), onPressed: onFalsePressed);
+  Widget _falseButtonWidget() =>
+      IconButton(icon: Icon(Icons.close), onPressed: onFalsePressed);
 }

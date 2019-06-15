@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/game.dart';
 import 'game_page.dart';
+import 'questions_list.dart';
 
 class DetailsPage extends StatefulWidget {
   final Game game;
@@ -58,9 +59,9 @@ class _DetailsPageState extends State<DetailsPage> {
         controller: _scrollController,
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) =>
             <Widget>[sliverAppBar],
-        body: _QuestionsList(
+        body: QuestionsList(
           widget.game,
-          detailsPageState: this,
+          rightText: _showAnswers ? RightTexts.correctAnswer : RightTexts.nothing,
         ),
       ),
     );
@@ -104,83 +105,4 @@ class _DetailsPageState extends State<DetailsPage> {
           ),
         ),
       );
-}
-
-class _QuestionsList extends StatefulWidget {
-  final Game game;
-  final _DetailsPageState detailsPageState;
-
-  _QuestionsList(this.game, {this.detailsPageState});
-
-  @override
-  _QuestionsListState createState() => _QuestionsListState();
-}
-
-class _QuestionsListState extends State<_QuestionsList> {
-  bool _questionsLoaded, _showAnswers = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _questionsLoaded = widget.game.questionsLoaded;
-
-    if (widget.detailsPageState != null) {
-      widget.detailsPageState._onShowAnswerChange = (showAnswers) {
-        setState(() {
-          _showAnswers = showAnswers;
-        });
-      };
-    }
-    if (!_questionsLoaded) {
-      widget.game.loadQuestions().whenComplete(() {
-        setState(() {
-          _questionsLoaded = true;
-        });
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_questionsLoaded && widget.game.questions.isNotEmpty) {
-      return ListView(
-        shrinkWrap: true,
-        children: widget.game.questions
-            .map((q) => ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: q.image.image,
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Flexible(
-                        child: Text(
-                          q.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(width: 8.0,),
-                      Text(
-                        _showAnswers ? q.answerCorrect.toString() : "",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.1),
-                      )
-                    ],
-                  ),
-                ))
-            .toList(),
-      );
-    } else if (_questionsLoaded && widget.game.questions.isEmpty) {
-      return Center(
-        child: Text("No questions available 😕"),
-      );
-    } else {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-  }
 }

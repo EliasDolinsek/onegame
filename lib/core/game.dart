@@ -46,4 +46,6 @@ class Game {
   }
 
   get questionsLoaded => _questionsLoaded;
+
+  get correctAnswersCount => questions.where((q) => q.answeredCorrectly).length;
 }
