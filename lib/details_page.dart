@@ -34,15 +34,15 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
+    super.initState();
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
-    super.initState();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_scrollListener);
     super.dispose();
+    _scrollController.removeListener(_scrollListener);
   }
 
   @override
@@ -51,7 +51,7 @@ class _DetailsPageState extends State<DetailsPage> {
       floatingActionButton: FloatingActionButton.extended(
           label: Text("START"),
           icon: Icon(Icons.arrow_forward),
-          onPressed: () => Navigator.of(context).push(
+          onPressed: () => Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => GamePage(widget.game)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: NestedScrollView(
@@ -153,11 +153,20 @@ class _QuestionsListState extends State<_QuestionsList> {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(q.title),
+                      Flexible(
+                        child: Text(
+                          q.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(width: 8.0,),
                       Text(
                         _showAnswers ? q.answerCorrect.toString() : "",
                         style: TextStyle(
-                            color: Theme.of(context).primaryColorDark),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.1),
                       )
                     ],
                   ),
