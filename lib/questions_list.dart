@@ -4,7 +4,6 @@ import 'core/game.dart';
 import 'core/question.dart';
 
 class QuestionsList extends StatefulWidget {
-  
   static const rightTextShowNothing = 0;
   static const rightTextUserAnswers = 1;
   static const rightTextCorrectAnswers = 2;
@@ -25,7 +24,7 @@ class QuestionsListState extends State<QuestionsList> {
   void initState() {
     super.initState();
     _questionsLoaded = widget.game.questionsLoaded;
-    
+
     if (!_questionsLoaded) {
       widget.game.loadQuestions().whenComplete(() {
         setState(() {
@@ -41,7 +40,8 @@ class QuestionsListState extends State<QuestionsList> {
       return ListView.builder(
         shrinkWrap: true,
         itemCount: widget.game.questions.length,
-        itemBuilder: (context, index) => getListTitleForQuestion(widget.game.questions.elementAt(index)),
+        itemBuilder: (context, index) => getListTitleForQuestion(
+            widget.game.questions.elementAt(index), index),
       );
     } else if (_questionsLoaded && widget.game.questions.isEmpty) {
       return Center(
@@ -54,51 +54,73 @@ class QuestionsListState extends State<QuestionsList> {
     }
   }
 
-  Widget getRightText(Question q){
-    if(widget.rightText == RightTexts.correctAnswer){
+  Widget getRightText(Question q) {
+    if (widget.rightText == RightTexts.correctAnswer) {
       return Text(q.answerCorrect.toString());
-    } else if(widget.rightText == RightTexts.userAnswer){
+    } else if (widget.rightText == RightTexts.userAnswer) {
       return getUserAnswerAsText(q);
     } else {
       return Text("");
     }
   }
 
-  Widget getUserAnswerAsText(Question question){
-    if(!question.answered){
-      return Text("not done", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: .1),);
-    } else if(question.answeredCorrectly){
-      return Text("passed", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: .1, color: Colors.green),);
+  Widget getUserAnswerAsText(Question question) {
+    if (!question.answered) {
+      return Chip(
+          label: Text(
+        "not done",
+        style: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: .1),
+      ));
+    } else if (question.answeredCorrectly) {
+      return Chip(
+        label: Text(
+          "passed",
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: .1,
+              color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+      );
     } else {
-      return Text("failed", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: .1, color: Colors.red),);
+      return Chip(
+        label: Text(
+          "failed",
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: .1,
+              color: Colors.white),
+        ),
+        backgroundColor: Colors.red,
+      );
     }
   }
 
-  Widget getListTitleForQuestion(Question q) => ListTile(
-    leading: CircleAvatar(
-      backgroundImage: q.image.image,
-    ),
-    title: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Flexible(
-          child: Text(
-            q.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+  Widget getListTitleForQuestion(Question q, int index) => ListTile(
+        leading: CircleAvatar(
+          child: Text((index + 1).toString()),
+          foregroundColor: Colors.black,
         ),
-        SizedBox(width: 16.0,),
-        getRightText(q),
-      ],
-    ),
-  );
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                q.title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(
+              width: 16.0,
+            ),
+            getRightText(q),
+          ],
+        ),
+      );
 }
 
-enum RightTexts {
-
-  correctAnswer,
-  userAnswer,
-  nothing
-
-}
+enum RightTexts { correctAnswer, userAnswer, nothing }

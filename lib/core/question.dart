@@ -12,7 +12,7 @@ class Question {
         title: "${ds["title"]}?",
         image: Image.network(
           ds["image"],
-          fit: BoxFit.fitHeight,
+          fit: BoxFit.scaleDown,
         ),
         answerCorrect: ds["answerCorrect"],
       );
