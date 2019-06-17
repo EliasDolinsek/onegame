@@ -4,8 +4,6 @@ import 'core/game_manager.dart';
 import 'core/question.dart';
 import 'result_page.dart';
 
-import 'package:vibration/vibration.dart';
-
 class GamePage extends StatefulWidget {
   final Game game;
 
