@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'overview_page.dart';
-
+import 'package:onegame/pages/loading_page.dart';
 void main() => runApp(App());
 
 class App extends StatelessWidget {
@@ -13,7 +12,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: OverviewPage(),
+      home: LoadingPage(),
     );
   }
 }

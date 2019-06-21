@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onegame/core/game.dart';
-import 'package:onegame/questions_list.dart';
+import 'package:onegame/widgets/questions_list.dart';
 
 class ResultPage extends StatelessWidget {
   final Game game;

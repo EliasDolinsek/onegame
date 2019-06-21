@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:onegame/core/game.dart';
 
-import 'core/game.dart';
-import 'game_page.dart';
-import 'questions_list.dart';
+import 'package:onegame/pages/game_page.dart';
+import 'package:onegame/widgets/questions_list.dart';
 
 class DetailsPage extends StatefulWidget {
   final Game game;

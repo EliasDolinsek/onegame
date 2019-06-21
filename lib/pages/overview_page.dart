@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:onegame/core/game.dart';
 
-import 'core/game.dart';
-import 'details_page.dart';
+import 'package:onegame/pages/details_page.dart';
+import 'package:onegame/pages/game_editor_page.dart';
+import 'package:onegame/widgets/action_image.dart';
 
-class OverviewPage extends StatelessWidget {
+import '../one_game_animation.dart';
+
+class OverviewPage extends StatefulWidget {
+  @override
+  _OverviewPageState createState() => _OverviewPageState();
+}
+
+class _OverviewPageState extends State<OverviewPage> {
+  int _currentIndex = 0;
+  final items = [GamesList(), OneGameAnimation()];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,7 +27,26 @@ class OverviewPage extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.white,
       ),
-      body: GamesList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => GameEditorPage(Game(), false))),
+        child: Icon(Icons.add),
+      ),
+      body: items.elementAt(_currentIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Container(height: 0),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle), title: Container(height: 0))
+        ],
+      ),
     );
   }
 }
@@ -79,7 +110,6 @@ class GamesCategoryList extends StatelessWidget {
 }
 
 class GameCategoryGamesList extends StatelessWidget {
-
   final String documentId;
 
   GameCategoryGamesList(this.documentId);
@@ -95,12 +125,20 @@ class GameCategoryGamesList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Column(
-            children: snapshot.data.documents
-                .map((ds) => Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: GameCard(Game.ofDocumentSnapshot(ds, documentId)),
-                    ))
-                .toList(),
+            children: snapshot.data.documents.map(
+              (ds) {
+                var game = Game.ofDocumentSnapshot(ds, documentId);
+                return Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: ActionImage(
+                    actionTitle: game.title,
+                    image: game.image,
+                    onTap: () => _showDetailsPage(game, context),
+                    heroTag: "game_image${game.hashCode}",
+                  ),
+                );
+              },
+            ).toList(),
           );
         } else {
           return Center(
@@ -110,41 +148,12 @@ class GameCategoryGamesList extends StatelessWidget {
       },
     );
   }
-}
 
-class GameCard extends StatelessWidget {
-  final Game game;
-
-  GameCard(this.game);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      child: Stack(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20.0),
-            child: Container(
-              height: 200,
-              width: double.infinity,
-              child: Hero(
-                child: game.image,
-                tag: "game_image${game.hashCode}",
-              ),
-            ),
-          ),
-          Positioned(
-            top: 140,
-            left: 16,
-            child: Chip(
-              label: Text(game.title, style: TextStyle(color: Colors.white),),
-              backgroundColor: Theme.of(context).primaryColor,
-            ),
-          )
-        ],
+  void _showDetailsPage(Game game, BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => DetailsPage(game),
       ),
-      onTap: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => DetailsPage(game))),
     );
   }
 }

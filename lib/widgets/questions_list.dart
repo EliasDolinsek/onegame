@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'core/game.dart';
-import 'core/question.dart';
+import 'package:onegame/core/game.dart';
+import 'package:onegame/core/question.dart';
 
 class QuestionsList extends StatefulWidget {
   static const rightTextShowNothing = 0;
@@ -41,7 +40,7 @@ class QuestionsListState extends State<QuestionsList> {
         shrinkWrap: true,
         itemCount: widget.game.questions.length,
         itemBuilder: (context, index) => getListTitleForQuestion(
-            widget.game.questions.elementAt(index), index),
+            widget.game.questions.elementAt(index)),
       );
     } else if (_questionsLoaded && widget.game.questions.isEmpty) {
       return Center(
@@ -99,9 +98,9 @@ class QuestionsListState extends State<QuestionsList> {
     }
   }
 
-  Widget getListTitleForQuestion(Question q, int index) => ListTile(
+  Widget getListTitleForQuestion(Question q) => ListTile(
         leading: CircleAvatar(
-          child: Text((index + 1).toString()),
+          backgroundImage: q.image.image,
           foregroundColor: Colors.black,
         ),
         title: Row(
