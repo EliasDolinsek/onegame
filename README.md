@@ -1,16 +1,11 @@
 # onegame
 
-Simple true false game
+### Description
+A simple game which consists of collections with questions. The user has to answer these questions correctly to get a high score. 1game also allows the user to create his collection. It's written in Flutter for Android and iOS and is using Firebase for realtime data storage, which means that icons, titles and texts will update live in the app.
 
-## Getting Started
+![image 1](https://i.ibb.co/3fFM0yk/onegame-02.png)
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+### Features
+* Create own collections
+* Play collections created by the user himself or others
+* Using Firebase for realtime data storage
